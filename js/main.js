@@ -18,35 +18,13 @@ $(function(){
   // Delete empty Array-Elements
   Array.prototype.clean = function(deleteValue) {
     for (var i = 0; i < this.length; i++) {
-      if (this[i] == deleteValue) {         
+      if (this[i] === deleteValue) {         
         this.splice(i, 1);
         i--;
       }
     }
     return this;
   };
-
-  // Sort Array
-  function sortByCategoryAsc(a, b){
-    var a = a.count;
-    var b = b.count; 
-    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-  }
-  function sortByCategoryDesc(a, b){
-    var a = a.count;
-    var b = b.count; 
-    return ((a > b) ? -1 : ((a < b) ? 1 : 0));
-  }
-  function sortByTitleAsc(a, b){
-    var a = a.word;
-    var b = b.word; 
-    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-  }
-  function sortByTitleDesc(a, b){
-    var a = a.word;
-    var b = b.word; 
-    return ((a > b) ? -1 : ((a < b) ? 1 : 0));
-  }
 
   // Print toDos
   function printToDo(pos) {
@@ -58,9 +36,8 @@ $(function(){
     var toDo;
     var searchRegex = new RegExp(searchTerm, "i");
     toDoStrings = localStorage.getItem('toDos');
-    if (toDoStrings != null) {
+    if (toDoStrings !== null) {
       toDoStrings = toDoStrings.split('||');
-      console.log(toDoStrings);
       toDos = [];
       for (var i = 0; i < toDoStrings.length; i++) {
         toDoParts = toDoStrings[i].split(';;');
@@ -71,10 +48,11 @@ $(function(){
         }
         toDos.push(toDo);
       }
+    sortArray();
       for (var i = 0; i < toDos.length; i++) {
-        if (searchTerm == '' || searchTerm == null) {
+        if (searchTerm === '' || searchTerm === null) {
           code += printToDo(i);
-        } else if (searchRegex.test(toDos[j].title) || searchRegex.test(toDos[j].category)) {
+        } else if (searchRegex.test(toDos[i].title) || searchRegex.test(toDos[i].category)) {
           code += printToDo(i);
         }
       }
@@ -82,80 +60,138 @@ $(function(){
     $('.todo-table > tbody').html(code);
   }
 
-  // Count toDos
-  var toDos = [];
-  $('.btnSave').click(function(){
-    if (toDos.length == 0) {
-      console.log(1);
-      var newId = 1;
-    } else {
-      console.log(2);
-      var newId = toDos[toDos.length - 1].id + 1;
-    }
-    var toDo = {
-      'id': newId,
-      'title': $('#title').val(),
-      'category': $('#category').val()
-    }
-    console.log(toDo);
-    toDos.push(toDo);
-    
+  // Generate localStorage toDoString
+  function localStorageString() {
     var toDoString;
     for (var i = 0; i < toDos.length; i++) {
       toDoString += i + ';;' + toDos[i].title + ';;' + toDos[i].category;
-      if (i != toDos.length - 1) {
+      if (i !== toDos.length - 1) {
         toDoString += '||';
       }
     }
     localStorage.setItem('toDos', toDoString);
+  }
 
-    $('#title').val('');
-    $('#category').val('');
-    console.log(toDos);
-    printToDos();
-    console.log(toDos);
-  });
-
-  function countToDos() {
-    var text = $('#text').val();
-    toDos = [];
-    var toDosTemplate;
-    text = text
-      .toLowerCase()
-      .replace(/[^\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00dfa-z0-9]/gi, ' ')
-      .trim()
-      .split(/[ \r?\n|\r]+/)
-      .clean("");
-
-    text.forEach(function(part) {
-      var x = 0;
-      toDosTemplate = {word: "", count: ""};
-      var found = false;
-      while (x < toDos.length) {
-        if (part == toDos[x].word) {
-          toDos[x].count++;
-          found = true;
-        }
-        x++;
+  // Count toDos
+  var toDos = [];
+  function saveToDo(){
+    if ($('#title').val().trim() !== '' && $('#title').val().trim() !== null) {
+      if (toDos.length === 0) {
+        var newId = 1;
+      } else {
+        var newId = toDos[toDos.length - 1].id + 1;
       }
-      if (!found) {
-        toDos[x] = toDosTemplate;
-        toDos[x].word = part;
-        toDos[x].count = 1;
+      var toDo = {
+        'id': newId,
+        'title': $('#title').val().trim(),
+        'category': $('#category').val().trim()
       }
-    }, this);
-    
-    if (sortBy == 'word' && sortOrder != 'desc') {
-      toDos = toDos.sort(sortByTitleAsc);
-    } else if (sortBy == 'word' && sortOrder == 'desc') {
-      toDos = toDos.sort(sortByTitleDesc);
-    } else if (sortBy == 'count' && sortOrder == 'asc') {
-      toDos = toDos.sort(sortByCategoryAsc);
-    } else {
-      toDos = toDos.sort(sortByCategoryDesc);
+      toDos.push(toDo);
+
+      localStorageString();
+
+      $('#title').val('');
+      $('#title').focus();
+      $('#category').val('');
+      printToDos();
     }
-    printToDos(null);
-    printStats();
+  }
+  
+  function deleteToDo(id) {
+    toDos.splice(toDos.findIndex(x => x.id == id));
+    localStorageString();
+    printToDos();
+  }
+
+  // Sort Array
+  function sortByCategoryAsc(a, b){
+    var a = a.category;
+    var b = b.category;
+    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+  }
+  function sortByCategoryDesc(a, b){
+    var a = a.category;
+    var b = b.category;
+    return ((a > b) ? -1 : ((a < b) ? 1 : 0));
+  }
+  function sortByTitleAsc(a, b){
+    var a = a.title;
+    var b = b.title;
+    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+  }
+  function sortByTitleDesc(a, b){
+    var a = a.title;
+    var b = b.title;
+    return ((a > b) ? -1 : ((a < b) ? 1 : 0));
+  }
+
+  function sortArray() {
+    if (sortBy === 'category' && sortOrder === 'asc') {
+      toDos = toDos.sort(sortByCategoryAsc);
+    } else if (sortBy === 'category' && sortOrder === 'desc') {
+      toDos = toDos.sort(sortByCategoryDesc);
+    } else if (sortBy === 'title' && sortOrder === 'desc') {
+      toDos = toDos.sort(sortByTitleDesc);
+    } else {
+      toDos = toDos.sort(sortByTitleAsc);
+    } 
+  }
+
+  function sortBtns(){
+    var id = this.id;
+    if (id === 'categoryAsc') {
+      sortBy = 'category';
+      sortOrder = 'asc';
+    } else if (id === 'categoryDesc') {
+      sortBy = 'category';
+      sortOrder = 'desc';
+    } else if (id === 'titleAsc') {
+      sortBy = 'title';
+      sortOrder = 'asc';
+    } else if (id === 'titleDesc') {
+      sortBy = 'title';
+      sortOrder = 'desc';
+    }
+    printToDos();
+
+    var message = '<h4><small>Sort by:</small> ';
+    var code = '';
+    if (sortBy === 'category') {
+      if (sortOrder === 'asc') {
+        code += '<button class="btn btn-default btn-sort" id="categoryDesc" role="button">Category DESC</button>';
+        code += '<button class="btn btn-default btn-sort" id="titleAsc" role="button">Title ASC</button>';
+      } else {
+        code += '<button class="btn btn-default btn-sort" id="categoryAsc" role="button">Category ASC</button>';
+        code += '<button class="btn btn-default btn-sort" id="titleAsc" role="button">Title ASC</button>';
+      }
+    } else if (sortBy === 'title') {
+      if (sortOrder === 'asc') {
+        code += '<button class="btn btn-default btn-sort" id="categoryAsc" role="button">Category ASC</button>';
+        code += '<button class="btn btn-default btn-sort" id="titleDesc" role="button">Title DESC</button>';
+      } else {
+        code += '<button class="btn btn-default btn-sort" id="categoryAsc" role="button">Category ASC</button>';
+        code += '<button class="btn btn-default btn-sort" id="titleAsc" role="button">Title ASC</button>';
+      }
+    }
+    
+    if (sortBy === 'category') {
+      if (sortOrder === 'asc') {
+        message += 'Category ascending';
+      } else {
+        message += 'Category descending';
+      }
+    } else if (sortBy === 'title') {
+      if (sortOrder === 'asc') {
+        message += 'Title ascending';
+      } else {
+        message += 'Title descending';
+      }
+    } else {
+        message += 'Title ascending';
+    }
+
+    message += '</h4>';
+    $('#sort_btn_block').html(message + code);
   }
 
   function sleep(ms) {
@@ -169,76 +205,34 @@ $(function(){
 
 
 
-  // Last modified date in footer
-  var last_mod = $.datepicker.formatDate('dd.mm.yy', new Date(document.lastModified));
-  $('#last_mod').html(last_mod);
 
   // Generate Sort-By-Buttons
-  var sortBy = 'count';
-  var sortOrder = 'desc';
-  $('#sort_btn_block').on('click', '.btn-sort', function(){
-    var id = this.id;
-    if (id == 'wordAsc') {
-      sortBy = 'word';
-      sortOrder = 'asc';
-    } else if (id == 'wordDesc') {
-      sortBy = 'word';
-      sortOrder = 'desc';
-    } else if (id == 'countAsc') {
-      sortBy = 'count';
-      sortOrder = 'asc';
-    } else if (id == 'countDesc') {
-      sortBy = 'count';
-      sortOrder = 'desc';
-    }
-    countToDos();
-
-
-    var message = '<h4><small>Sort by:</small> ';
-    var code = '';
-    if (sortBy == 'word') {
-      if (sortOrder == 'asc') {
-        code += '<button class="btn btn-default btn-sort" id="wordDesc" role="button">Word DESC</button>';
-        code += '<button class="btn btn-default btn-sort" id="countDesc" role="button">Count DESC</button>';
-      } else {
-        code += '<button class="btn btn-default btn-sort" id="wordAsc" role="button">Word ASC</button>';
-        code += '<button class="btn btn-default btn-sort" id="countDesc" role="button">Count DESC</button>';
-      }
-    } else if (sortBy == 'count') {
-      if (sortOrder == 'desc') {
-        code += '<button class="btn btn-default btn-sort" id="wordAsc" role="button">Word ASC</button>';
-        code += '<button class="btn btn-default btn-sort" id="countAsc" role="button">Count ASC</button>';
-      } else {
-        code += '<button class="btn btn-default btn-sort" id="wordAsc" role="button">Word ASC</button>';
-        code += '<button class="btn btn-default btn-sort" id="countDesc" role="button">Count DESC</button>';
-      }
-    }
-    
-    if (sortBy == 'word') {
-      if (sortOrder == 'asc') {
-        message += 'Word ascending';
-      } else {
-        message += 'Word descending';
-      }
-    } else if (sortBy == 'count') {
-      if (sortOrder == 'desc') {
-        message += 'Count descending';
-      } else {
-        message += 'Count ascending';
-      }
-    } else {
-      message += 'Count descending';
-    }
-
-    message += '</h4>';
-    $('#sort_btn_block').html(message + code);
-  });
+  var sortBy = 'title';
+  var sortOrder = 'asc';
+  $('#sort_btn_block').on('click', '.btn-sort', sortBtns);
   
   // Print toDos
   printToDos();
+
+  // Last modified date in footer
+  var last_mod = $.datepicker.formatDate('dd.mm.yy', new Date(document.lastModified));
+  $('#last_mod').html(last_mod);
   
   // Search
   $('#search').bind('input propertychange', function() {
     printToDos(this.value);
+  });
+
+  // Save ToDo
+  $('.btnSave').click(saveToDo);
+  $('body').keyup(function(event){
+    if(event.keyCode === 13) {
+        $("#btnSave").click();
+    }
+  });
+
+  // Delete ToDo
+  $(document).delegate('.btnDelete', 'click', function(){
+    deleteToDo(this.id);
   });
 });

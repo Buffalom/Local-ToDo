@@ -60,7 +60,7 @@
                     <td>
                       <div class="form-group">
                         <label for="btnSave">Save</label>
-                        <button class="form-control btn btn-default btnSave" id="" role="button">Save</button>
+                        <button class="form-control btn btn-default btnSave" id="btnSave" role="button">Save</button>
                       </div>
                     </td>
                   </tr>
@@ -71,13 +71,19 @@
                   </tr>
                 </thead>
                 <tbody>
+
                 </tbody>
               </table>
             </div>
             <div>
-              <h4><small>Search for:</small></h4>
               <div class="form-group col-lg-4 col-md-6 col-sm-6">
+                <h4><small>Search for:</small></h4>
                 <input type="search" class="form-control" id="search" name="search" placeholder="Search">
+                <div id="sort_btn_block">
+                  <h4><small>Sort by:</small> Title ascending</h4>
+                  <button class="btn btn-default btn-sort" id="categoryAsc" role="button">Category ASC</button>
+                  <button class="btn btn-default btn-sort" id="titleDesc"  role="button">Title DESC</button>
+                </div>
               </div>
             </div>
           </div>
@@ -86,7 +92,7 @@
 
       <br />
       <footer class="footer">
-        <p>Word Counter | <span id="last_mod"></span></p>
+        <p>ToDo | <span id="last_mod"></span></p>
       </footer>
     </div> <!-- /container -->
     
