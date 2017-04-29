@@ -225,7 +225,7 @@ $(function(){
 
   // Save ToDo
   $('.btnSave').click(saveToDo);
-  $('body').keyup(function(event){
+  $('#category').keyup(function(event){
     if(event.keyCode === 13) {
         $("#btnSave").click();
     }
