@@ -1,0 +1,17 @@
+body {
+  max-height: 100vh;
+}
+
+textarea {
+  resize: vertical;
+}
+
+table {
+  display: block;
+  overflow: auto;
+}
+table.word-table {
+  height: 25vh;
+  border-spacing: collapse;
+  border-spacing: 0;
+}
